@@ -1,6 +1,7 @@
 package fifo;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
@@ -12,27 +13,45 @@ public class UsuarioDAO {
     }
     
     //verifica se existe o login
-    public void verificarLogin(String nomeUsuario, String senha){
+    public UsuarioView verificarLogin(String nomeUsuario, String senha){
         String sql = "SELECT * FROM Usuario WHERE nome_User =? AND senha = ?";
         
         try(Connection cone = DriverManager.getConnection(conexaoJDBC);
               PreparedStatement ps = cone.prepareStatement(sql)){
             ps.setString(1,nomeUsuario);
             ps.setString(2, senha);
-            int linhas = ps.executeUpdate();
-            if(linhas >0){
-                System.out.println("verificação concluida: " + linhas);
+            
+            ResultSet rs = ps.executeQuery();
+            
+            if(rs.next()){
+                System.out.println("Login sucedido no DAO");
+                
+                UsuarioView usuarioEncontrado = new UsuarioView();
+                usuarioEncontrado.setNomeUsuário(rs.getString("nome_User"));
+                usuarioEncontrado.setSenha(rs.getString("senha"));
+                usuarioEncontrado.setNomeEmpresa(rs.getString("empresa"));
+                usuarioEncontrado.setCnpj(rs.getString("cnpj"));
+                usuarioEncontrado.setNomeFantasia(rs.getString("nome_Fantasia"));
+                usuarioEncontrado.setEmail(rs.getString("email"));
+                usuarioEncontrado.setTipoDeEmpresa(rs.getString("tipo_empresa"));
+                usuarioEncontrado.setEndereço(rs.getString("endereco"));
+                usuarioEncontrado.setTelefone(rs.getString("telefone"));
+                
+                return usuarioEncontrado;
+                
             }
             
         }catch(SQLException e){
             System.out.println("Erro de conexão usuárioDAO, favor verificar: verification error");
         }
+        System.out.println("usuario e senhas não encontrados");
+        return null;
     }
     
     
     //Cadastro do usuário
     public void insert(String nomeUsuario, String empresa, String cnpj, String nomeFantasia,String email,String senha,String TipoEmpresa, String endereco, String telefone){
-         String sql = "INSERT INTO Usuario (nome_User,empresa,cnpj,nome_Fantasia,email,senha,tipo_empresa,endereco,telefone,)VALUES(?,?,?,?,?,?,?,?,?)";
+         String sql = "INSERT INTO Usuario (nome_User,empresa,cnpj,nome_Fantasia,email,senha,tipo_empresa,endereco,telefone)VALUES(?,?,?,?,?,?,?,?,?)";
          
          try(Connection cone = DriverManager.getConnection(conexaoJDBC);
                  PreparedStatement ps = cone.prepareStatement(sql)){
