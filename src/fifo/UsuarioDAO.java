@@ -57,8 +57,17 @@ public class UsuarioDAO {
     }                 
     
     
-    public void update(){
+    public void update(String email, String senha, String cnpj){
+        String sql = "UPDATE Usuario SET email=?, senha=? where cnpj=?";
         
+        try(Connection cone = DriverManager.getConnection(conexaoJDBC);
+               PreparedStatement ps = cone.prepareStatement(sql)){
+            ps.setString(1, email);
+            ps.setString(2, senha);
+            ps.setString(3, cnpj);
+        }catch(SQLException e){
+            System.out.println("Erro conexao: update");
+        }
     }
     
     public void delete(String cnpj){
@@ -67,8 +76,13 @@ public class UsuarioDAO {
         try(Connection cone = DriverManager.getConnection(conexaoJDBC);
              PreparedStatement ps = cone.prepareStatement(sql)){
             ps.setString(1,cnpj);
+            
+            int linhas = ps.executeUpdate();
+            if(linhas > 0){
+                System.out.println(linhas+" deletadas com sucesso!");
+            }
         }catch(SQLException e){
-            System.out.println("Erro de conexão usuárioDAO, favor verificar: insert error");
+            System.out.println("Erro de conexão usuárioDAO, favor verificar: delete error");
         }
     }
 }
